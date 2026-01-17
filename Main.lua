@@ -1,100 +1,91 @@
--- =================================
---        SKY FISH SCRIPT
--- =================================
+-- ===============================
+-- SKY BASE (UI ENGINE TEMPLATE)
+-- ===============================
 
-print([[
-███████╗██╗  ██╗██╗   ██╗
-██╔════╝██║ ██╔╝╚██╗ ██╔╝
-███████╗█████╔╝  ╚████╔╝ 
-╚════██║██╔═██╗   ╚██╔╝  
-███████║██║  ██╗   ██║   
-╚══════╝╚═╝  ╚═╝   ╚═╝   
-      SKY FISH SCRIPT LOADED
-]])
+print("SKY BASE LOADED")
 
--- =================================
+-- ===============================
 -- CONFIG
--- =================================
-Config = {
+-- ===============================
+local Config = {
     MenuOpen = true,
     AutoFishing = false,
     FishingDelay = 1.0,
     CancelDelay = 0.5
 }
 
--- =================================
--- FISHING FUNCTIONS (ISI KODE ASLI DI SINI)
--- =================================
-function doCastFishing()
-    print("[Fishing] Cast rod")
-    -- ganti ini dengan logic kamu sendiri nanti
+-- ===============================
+-- UI ABSTRACTION (DUMMY ENGINE)
+-- ===============================
+local UI = {}
+
+function UI:CreateWindow(title)
+    print("[UI] Window Created:", title)
+    return {
+        Title = title,
+        Visible = true
+    }
 end
 
-function doCancelFishing()
-    print("[Fishing] Cancel / Reel")
-    -- ganti ini dengan logic kamu sendiri nanti
+function UI:CreateImage(window, url)
+    print("[UI] Image Loaded:", url)
 end
 
--- =================================
--- MENU CONTROL
--- =================================
-function ToggleMenu()
-    Config.MenuOpen = not Config.MenuOpen
-    print("[MENU]", Config.MenuOpen and "OPENED" or "CLOSED")
+function UI:CreateButton(window, text, callback)
+    print("[UI] Button Created:", text)
+    return {
+        Click = callback
+    }
 end
 
-function ToggleAutoFishing()
+function UI:SetVisible(window, state)
+    window.Visible = state
+    print("[UI] Window Visible:", state)
+end
+
+-- ===============================
+-- CREATE UI
+-- ===============================
+local Window = UI:CreateWindow("SKY FISH BASE")
+
+-- Logo dari URL kamu
+UI:CreateImage(Window, "https://files.catbox.moe/35utto.jpg")
+
+-- Buttons
+local ToggleFishingBtn = UI:CreateButton(Window, "Toggle Auto Fishing", function()
     Config.AutoFishing = not Config.AutoFishing
-    print("[AUTO FISHING]", Config.AutoFishing and "ON" or "OFF")
+    print("[AutoFishing]", Config.AutoFishing and "ON" or "OFF")
+end)
+
+local CloseMenuBtn = UI:CreateButton(Window, "Close Menu", function()
+    Config.MenuOpen = false
+    UI:SetVisible(Window, false)
+end)
+
+local OpenMenuBtn = UI:CreateButton(Window, "Open Menu", function()
+    Config.MenuOpen = true
+    UI:SetVisible(Window, true)
+end)
+
+-- ===============================
+-- FISHING LOGIC (DUMMY)
+-- ===============================
+local function doCastFishing()
+    print("[Fishing] Cast rod")
 end
 
-function SetFishingDelay(v)
-    Config.FishingDelay = v
-    print("[SET] Fishing Delay:", v)
+local function doCancelFishing()
+    print("[Fishing] Cancel")
 end
 
-function SetCancelDelay(v)
-    Config.CancelDelay = v
-    print("[SET] Cancel Delay:", v)
+-- ===============================
+-- AUTO FISH LOOP (SIMULATION)
+-- ===============================
+local function sleep(t)
+    local start = os.time()
+    repeat until os.time() > start + t
 end
 
--- =================================
--- MENU DISPLAY
--- =================================
-function ShowMenu()
-    if not Config.MenuOpen then return end
-
-    print([[
-==============================
-         SKY MENU
-==============================
-1. Toggle Auto Fishing
-2. Set Fishing Delay
-3. Set Cancel Delay
-4. Open / Close Menu
-5. Show Current Config
-0. Exit Menu
-==============================
-]])
-end
-
--- =================================
--- INPUT HELPER
--- =================================
-function input(msg)
-    io.write(msg .. ": ")
-    return io.read()
-end
-
--- =================================
--- AUTO FISHING LOOP
--- =================================
-local function sleep(sec)
-    local t = os.clock()
-    while os.clock() - t < sec do end
-end
-
--- thread auto fishing
 coroutine.wrap(function()
     while true do
         if Config.AutoFishing then
@@ -104,42 +95,8 @@ coroutine.wrap(function()
             doCancelFishing()
             sleep(Config.CancelDelay)
         end
-        sleep(0.1)
+        sleep(1)
     end
 end)()
 
--- =================================
--- MENU LOOP
--- =================================
-while true do
-    ShowMenu()
-    local c = input("Select")
-
-    if c == "1" then
-        ToggleAutoFishing()
-
-    elseif c == "2" then
-        local v = tonumber(input("Fishing Delay (seconds)"))
-        if v then SetFishingDelay(v) end
-
-    elseif c == "3" then
-        local v = tonumber(input("Cancel Delay (seconds)"))
-        if v then SetCancelDelay(v) end
-
-    elseif c == "4" then
-        ToggleMenu()
-
-    elseif c == "5" then
-        print("===== CURRENT CONFIG =====")
-        print("MenuOpen     :", Config.MenuOpen)
-        print("AutoFishing  :", Config.AutoFishing)
-        print("FishingDelay :", Config.FishingDelay)
-        print("CancelDelay  :", Config.CancelDelay)
-
-    elseif c == "0" then
-        print("Menu closed. Script still running.")
-        break
-    end
-
-    sleep(0.2)
-end
+print("SKY BASE UI READY")
